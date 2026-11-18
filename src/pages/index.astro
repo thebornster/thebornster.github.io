@@ -10,7 +10,6 @@ const posts = (await getCollection('posts', (p) => !p.data.draft))
   .slice(0, 3);
 
 const hasPage = (p: (typeof projects)[number]) => Boolean(p.body?.trim());
-const years = [...new Set(projects.map((p) => p.data.date.getUTCFullYear()))];
 const awards = projects.filter((p) => p.data.award).length;
 const typeLabel = { software: 'Software', hardware: 'Hardware', hackathon: 'Hackathon' };
 const filters = [
@@ -24,137 +23,110 @@ const filters = [
 ---
 
 <Base section="work">
-  <section class="intro">
-    <h1>{site.pitch}</h1>
-    <p class="num">{projects.length} projects{awards > 0 && `, ${awards} hackathon awards`}{site.email && <>. Reach me at {site.email}</>}</p>
+  <section class="hero narrow">
+    <p class="eyebrow">{site.role}</p>
+    <h1>{site.name}</h1>
+    <p class="sub">{site.pitch}</p>
+    <div class="ctas">
+      <a class="btn" href="#projects">See projects</a>
+      <a class="chev" href={site.github}>GitHub</a>
+    </div>
   </section>
 
-  <section id="projects">
-    <div class="section-head g">
-      <h2>Projects</h2>
-      <div class="filters aside" role="group" aria-label="Filter projects">
-        {filters.filter((f) => f.key === 'all' || f.count > 0).map((f) => (
-          <button type="button" data-filter={f.key} aria-pressed={f.key === 'all' ? 'true' : 'false'}>
-            {f.label} <span class="num">{f.count}</span>
-          </button>
+  <section class="band" id="projects">
+    <div class="wrap">
+      <div class="head">
+        <h2>Projects</h2>
+        <p class="num">{projects.length} projects{awards > 0 && `, ${awards} hackathon awards`}.</p>
+        <div class="seg" role="group" aria-label="Filter projects">
+          {filters.filter((f) => f.key === 'all' || f.count > 0).map((f) => (
+            <button type="button" data-filter={f.key} aria-pressed={f.key === 'all' ? 'true' : 'false'}>{f.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="tiles">
+        {projects.map((p) => (
+          <article class="tile" data-type={p.data.type}>
+            {p.data.award && <p class="eyebrow award">{p.data.award}</p>}
+            <h3>{p.data.title}</h3>
+            <p class="meta">
+              {typeLabel[p.data.type]} &middot; {formatDate(p.data.date)}{p.data.event && <> &middot; {p.data.event}</>}
+            </p>
+            <p class="summary">{p.data.summary}</p>
+            {p.data.learned && <p class="learned"><span>What I learned.</span> {p.data.learned}</p>}
+            <div class="links">
+              {hasPage(p) && <a class="chev" href={`/projects/${p.id}/`}>Read more</a>}
+              {Object.entries(p.data.links).map(([label, href]) => <a class="chev" href={href}>{label}</a>)}
+            </div>
+            {p.data.image && <Image class="shot" src={p.data.image} alt={p.data.imageAlt ?? ''} widths={[480, 960]} sizes="(max-width: 834px) 100vw, 480px" />}
+          </article>
         ))}
       </div>
     </div>
-
-    {years.map((year) => (
-      <>
-        <div class="yr-row" data-year={year}><span class="num">{year}</span></div>
-        {projects.filter((p) => p.data.date.getUTCFullYear() === year).map((p) => (
-          <article class="entry g" data-type={p.data.type} data-year={year}>
-            <span class="when num">{formatDate(p.data.date, { month: 'short' })}</span>
-            <div class="what">
-              <h3>{hasPage(p) ? <a href={`/projects/${p.id}/`}>{p.data.title}</a> : p.data.title}</h3>
-              <span class="type">{typeLabel[p.data.type]}</span>
-              {p.data.award && <span class="award">{p.data.award}</span>}
-            </div>
-            <div class="body">
-              <p>{p.data.summary}</p>
-              {p.data.event && <p class="meta">{p.data.event}</p>}
-              {p.data.learned && <p class="learned"><span>Learned</span>{p.data.learned}</p>}
-              {p.data.image && (
-                <div class="pic" id={`pic-${p.id}`} hidden>
-                  <Image src={p.data.image} alt={p.data.imageAlt ?? ''} width={960} />
-                </div>
-              )}
-            </div>
-            <div class="links">
-              {hasPage(p) && <a href={`/projects/${p.id}/`}>Write-up</a>}
-              {Object.entries(p.data.links).map(([label, href]) => <a href={href}>{label}</a>)}
-              {p.data.image && (
-                <button type="button" class="link-btn" aria-expanded="false" aria-controls={`pic-${p.id}`}>Screenshot</button>
-              )}
-            </div>
-          </article>
-        ))}
-      </>
-    ))}
   </section>
 
   {posts.length > 0 && (
-    <section class="writing">
-      <div class="section-head g"><h2>Writing</h2><a class="aside" href="/writing/">All posts</a></div>
+    <section class="writing narrow">
+      <h2>Writing</h2>
       {posts.map((post) => (
-        <a class="post g" href={`/writing/${post.id}/`}>
-          <span class="when num">{formatDate(post.data.date)}</span>
+        <a class="post" href={`/writing/${post.id}/`}>
           <span class="t">{post.data.title}</span>
-          <span class="r num">{readingTime(post.body)} min</span>
+          <span class="d num">{formatDate(post.data.date)} &middot; {readingTime(post.body)} min read</span>
         </a>
       ))}
+      <a class="chev all" href="/writing/">All posts</a>
     </section>
   )}
 </Base>
 
 <script>
-  const entries = document.querySelectorAll<HTMLElement>('.entry');
-  const years = document.querySelectorAll<HTMLElement>('.yr-row');
+  const tiles = document.querySelectorAll<HTMLElement>('.tile');
   const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const f = btn.dataset.filter;
       buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      entries.forEach((e) => (e.hidden = f !== 'all' && e.dataset.type !== f));
-      years.forEach((y) => {
-        y.hidden = !document.querySelector(`.entry[data-year="${y.dataset.year}"]:not([hidden])`);
-      });
-    });
-  });
-
-  document.querySelectorAll<HTMLButtonElement>('.entry .link-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const pic = document.getElementById(btn.getAttribute('aria-controls')!)!;
-      pic.hidden = !pic.hidden;
-      btn.setAttribute('aria-expanded', String(!pic.hidden));
+      tiles.forEach((t) => (t.hidden = f !== 'all' && t.dataset.type !== f));
     });
   });
 </script>
 
 <style>
-  .intro { padding: 56px 0 64px; display: grid; gap: 14px; }
-  .intro h1 { margin: 0; max-width: 24ch; font-size: clamp(30px, 4.4vw, 52px); font-stretch: 82%; font-weight: 650; line-height: 1.05; text-wrap: balance; }
-  .intro p { margin: 0; font-size: 14px; color: var(--dim); }
+  .hero { text-align: center; padding-block: clamp(64px, 11vw, 120px) clamp(56px, 9vw, 100px); display: grid; gap: 10px; justify-items: center; }
+  .hero h1 { margin: 0; font-family: var(--display); font-size: clamp(48px, 9vw, 80px); font-weight: 700; line-height: 1.05; letter-spacing: -0.015em; }
+  .hero .sub { margin: 6px 0 0; font-family: var(--display); font-size: clamp(21px, 2.8vw, 28px); line-height: 1.25; letter-spacing: .004em; color: var(--dim); max-width: 30ch; text-wrap: balance; }
+  .ctas { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 28px; margin-top: 24px; font-size: 17px; }
 
-  .filters { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 18px; }
-  .filters button { font: 13px var(--sans); color: var(--dim); background: none; border: 0; padding: 0; cursor: pointer; }
-  .filters button[aria-pressed='true'] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--cobalt); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .band { padding-block: clamp(56px, 8vw, 96px); }
+  .head { text-align: center; display: grid; gap: 8px; justify-items: center; margin-bottom: 36px; }
+  .head h2 { margin: 0; font-family: var(--display); font-size: clamp(36px, 5.5vw, 56px); font-weight: 700; line-height: 1.07; letter-spacing: -0.005em; }
+  .head p { margin: 0; color: var(--dim); font-size: 19px; }
+  .seg { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 2px; background: var(--seg); padding: 3px; border-radius: 980px; margin-top: 16px; }
+  .seg button { font: 500 14px var(--sans); letter-spacing: -0.01em; color: var(--ink); background: transparent; border: 0; padding: 7px 16px; border-radius: 980px; cursor: pointer; }
+  .seg button[aria-pressed='true'] { background: var(--seg-on); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
 
-  .yr-row { padding: 28px 0 6px; border-bottom: 1px solid var(--ink); font-size: 13px; font-weight: 600; letter-spacing: .06em; }
-  .entry { padding: 16px 0 18px; border-bottom: 1px solid var(--line); row-gap: 8px; align-items: baseline; }
-  .entry .when { grid-column: span 1; font-size: 13px; color: var(--dim); }
-  .entry .what { grid-column: 2 / span 3; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; min-width: 0; }
-  .entry h3 { margin: 0; font-size: 19px; font-weight: 650; line-height: 1.2; flex-basis: 100%; }
-  .entry h3 a { text-decoration: none; }
-  .entry h3 a:hover { color: var(--cobalt); }
-  .entry .type { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
-  .entry .award { font-size: 10.5px; padding: 3px 6px 2px; }
-  .entry .body { grid-column: 5 / span 6; display: grid; gap: 6px; min-width: 0; }
-  .entry .body p { margin: 0; font-size: 15px; line-height: 1.45; max-width: 62ch; }
-  .entry .meta { font-size: 13px !important; color: var(--dim); }
-  .entry .learned { color: var(--dim); }
-  .entry .learned span { display: inline-block; margin-right: 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--cobalt); }
-  .entry .pic { margin-top: 6px; max-width: 480px; }
-  .entry .links { grid-column: 11 / span 2; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 14px; font-size: 13px; }
-  .link-btn { font: 13px var(--sans); background: none; border: 0; padding: 0; cursor: pointer; }
-  .link-btn[aria-expanded='true'] { color: var(--cobalt); }
-  .entry[hidden], .yr-row[hidden], .pic[hidden] { display: none; }
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .tile { background: var(--tile); border-radius: 18px; padding: clamp(28px, 4vw, 44px) clamp(22px, 3.5vw, 40px); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+  .tile[hidden] { display: none; }
+  .tile h3 { margin: 0; font-family: var(--display); font-size: clamp(28px, 3.4vw, 36px); font-weight: 700; line-height: 1.1; letter-spacing: -0.003em; text-wrap: balance; }
+  .tile .meta { margin: 0; font-size: 14px; color: var(--dim); text-wrap: balance; }
+  .tile .summary { margin: 8px 0 0; font-size: 17px; line-height: 1.47; max-width: 38ch; }
+  .tile .learned { margin: 4px 0 0; font-size: 14px; line-height: 1.43; color: var(--dim); max-width: 42ch; }
+  .tile .learned span { color: var(--ink); font-weight: 600; }
+  .tile .links { margin-top: auto; padding-top: 14px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 24px; font-size: 17px; }
+  .tile .shot { margin-top: 20px; border-radius: 12px; }
 
-  .writing { margin-top: 64px; }
-  .post { padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
-  .post:hover .t { color: var(--cobalt); }
-  .post .when { grid-column: span 2; font-size: 13px; color: var(--dim); }
-  .post .t { grid-column: 3 / span 7; font-size: 17px; font-weight: 500; }
-  .post .r { grid-column: 10 / span 3; text-align: right; font-size: 13px; color: var(--dim); }
+  .writing { padding-block: clamp(56px, 8vw, 96px); text-align: center; display: grid; gap: 0; }
+  .writing h2 { margin: 0 0 28px; font-family: var(--display); font-size: clamp(36px, 5.5vw, 56px); font-weight: 700; line-height: 1.07; }
+  .post { display: grid; gap: 4px; padding: 18px 0; border-top: 1px solid var(--line); color: var(--ink); }
+  .post:hover { text-decoration: none; }
+  .post:hover .t { color: var(--link); }
+  .post .t { font-size: 21px; font-weight: 600; }
+  .post .d { font-size: 14px; color: var(--dim); }
+  .writing .all { margin-top: 20px; }
 
-  @media (max-width: 780px) {
-    .intro { padding: 32px 0 44px; }
-    .filters { justify-content: flex-start; }
-    .entry .when, .entry .what, .entry .body, .entry .links { grid-column: 1 / -1; justify-content: flex-start; }
-    .post .when, .post .t { grid-column: 1 / -1; }
-    .post .r { display: none; }
+  @media (max-width: 834px) {
+    .tiles { grid-template-columns: 1fr; }
   }
 </style>

@@ -9,32 +9,27 @@ const posts = (await getCollection('posts', (p) => !p.data.draft)).sort(
 ---
 
 <Base title="Writing" section="writing">
-  <h1 class="title">Writing</h1>
-  <div class="section-head g"><h2>All posts</h2><span class="aside num">{posts.length}</span></div>
-  <div class="list">
+  <header class="article-head narrow">
+    <h1>Writing</h1>
+    <p class="dek">Notes on things I've built and what I learned along the way.</p>
+  </header>
+  <div class="list narrow">
     {posts.map((post) => (
-      <a class="g" href={`/writing/${post.id}/`}>
-        <span class="d num">{formatDate(post.data.date)}</span>
-        <span class="t">
-          {post.data.title}
-          <span class="desc">{post.data.description}</span>
-        </span>
-        <span class="r num">{readingTime(post.body)} min</span>
+      <a href={`/writing/${post.id}/`}>
+        <span class="d num">{formatDate(post.data.date)} &middot; {readingTime(post.body)} min read</span>
+        <span class="t">{post.data.title}</span>
+        <span class="desc">{post.data.description}</span>
       </a>
     ))}
   </div>
 </Base>
 
 <style>
-  .title { font-stretch: 78%; font-weight: 750; font-size: clamp(38px, 5.6vw, 68px); line-height: .95; margin: 40px 0 28px; }
-  .list a { padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
-  .list a:hover .t { color: var(--cobalt); }
-  .d { grid-column: span 2; font-size: 13px; color: var(--dim); }
-  .t { grid-column: 3 / span 7; font-size: 19px; font-weight: 500; display: grid; gap: 4px; }
-  .desc { font-size: 15px; font-weight: 400; color: var(--dim); }
-  .r { grid-column: 10 / span 3; text-align: right; font-size: 13px; color: var(--dim); }
-  @media (max-width: 780px) {
-    .d, .t { grid-column: 1 / -1; }
-    .r { display: none; }
-  }
+  .list { padding-bottom: 80px; }
+  .list a { display: grid; gap: 4px; padding: 22px 0; border-top: 1px solid var(--line); color: var(--ink); }
+  .list a:hover { text-decoration: none; }
+  .list a:hover .t { color: var(--link); }
+  .d { font-size: 14px; color: var(--dim); }
+  .t { font-size: 24px; font-weight: 600; line-height: 1.2; }
+  .desc { font-size: 17px; color: var(--dim); }
 </style>

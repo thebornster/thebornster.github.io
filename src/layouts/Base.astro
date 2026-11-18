@@ -18,7 +18,7 @@ const fullTitle = title ? `${title} | ${site.name}` : site.name;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -27,35 +27,35 @@ const fullTitle = title ? `${title} | ${site.name}` : site.name;
     <meta property="og:description" content={description} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,400&family=JetBrains+Mono:wght@400&display=swap"
-    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
   </head>
   <body>
-    <div class="page">
-      <header class="hdr g">
+    <header class="nav">
+      <div class="wrap">
         <a class="who" href="/">{site.name}</a>
-        <div class="role">{site.role}</div>
         <nav>
-          <a href="/" aria-current={section === 'work' ? 'page' : undefined}>Work</a>
+          <a href="/#projects" aria-current={section === 'work' ? 'page' : undefined}>Projects</a>
           {hasPosts && <a href="/writing/" aria-current={section === 'writing' ? 'page' : undefined}>Writing</a>}
           {site.resume && <a href={site.resume}>Resume</a>}
           <a href={site.github}>GitHub</a>
         </nav>
-      </header>
+      </div>
+    </header>
 
+    <main>
       <slot />
+    </main>
 
-      <footer class="foot g">
-        <div class="a">{site.email}</div>
-        <div class="b">
+    <footer class="foot">
+      <div class="wrap">
+        <span>Copyright &copy; {new Date().getFullYear()} {site.name}. Built with Astro.</span>
+        <span class="links">
+          {site.email && <span>{site.email}</span>}
           <a href={site.github}>GitHub</a>
           {site.linkedin && <a href={site.linkedin}>LinkedIn</a>}
-          {site.resume && <a href={site.resume}>Resume (PDF)</a>}
-        </div>
-        <div class="cc num">&copy; {new Date().getFullYear()}</div>
-      </footer>
-    </div>
+          {site.resume && <a href={site.resume}>Resume</a>}
+        </span>
+      </div>
+    </footer>
   </body>
 </html>
