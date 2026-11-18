@@ -3,7 +3,8 @@ title: Valmet Digital Twin
 date: 2026-11-06
 type: hackathon
 featured: false
-summary: Turns a 3D Gaussian Splatting scan of an equipment room into a navigable digital twin with detected equipment, collision-free inspection routes and AI service diagnostics. Built for the Valmet Automation challenge at Since AI Hackathon 2026.
+summary: "Turns a 3D Gaussian Splatting scan of an equipment room into a navigable digital twin with detected equipment, inspection routes and AI service diagnostics."
+event: Since AI Hackathon 2026, Valmet challenge
 team: 4 people
 stack: [Python, Open3D, YOLOE, SAM 2, Gemini, Viser]
 links:

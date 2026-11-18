@@ -4,7 +4,8 @@ date: 2026-05-01
 type: hackathon
 featured: true
 award: 1st place, Supercell track + Crowd Favorite
-summary: A horror game that watches you through your webcam. NPCs react to your face, your hesitation and your tells in real time, and the dialogue changes with them. Built in 18 hours at the Supercell x Florent Venture Partners Agentic Frontier Hackathon.
+summary: "A horror game that watches you through your webcam. NPCs read your face and hesitation in real time, and the dialogue turns on what they see."
+event: Supercell x Florent Venture Partners Agentic Frontier Hackathon
 learned: Putting the player's experience ahead of the technology is what won both prizes.
 team: 4 people
 ---

@@ -50,16 +50,15 @@ const filters = [
         return (
           <Tag class="proj g" href={hasPage(p) ? `/projects/${p.id}/` : undefined}>
             <div class="yr num">{p.data.date.getUTCFullYear()}</div>
-            <div class="shot">
-              {p.data.image
-                ? <Image src={p.data.image} alt={p.data.imageAlt ?? ''} widths={[640, 960, 1400]} sizes="(max-width: 780px) 100vw, 60vw" />
-                : <div class="placeholder">Add a screenshot</div>}
-            </div>
+            {p.data.image
+              ? <div class="shot"><Image src={p.data.image} alt={p.data.imageAlt ?? ''} widths={[640, 960, 1400]} sizes="(max-width: 780px) 100vw, 60vw" /></div>
+              : <p class="shot lead">{p.data.summary}</p>}
             <div class="info">
               <h3>{p.data.title}</h3>
               {p.data.award && <span class="award">{p.data.award}</span>}
-              <p>{p.data.summary}</p>
+              {p.data.image && <p>{p.data.summary}</p>}
               <dl class="facts">
+                {p.data.event && <><dt>Event</dt><dd>{p.data.event}</dd></>}
                 {p.data.role && <><dt>Role</dt><dd>{p.data.role}</dd></>}
                 {p.data.stack.length > 0 && <><dt>Stack</dt><dd>{p.data.stack.join(', ')}</dd></>}
                 {p.data.team && <><dt>Team</dt><dd>{p.data.team}</dd></>}
@@ -98,6 +97,7 @@ const filters = [
                   <h3>{p.data.title}</h3>
                   <span class="type">{typeLabel[p.data.type]}</span>
                   {p.data.award && <span class="award">{p.data.award}</span>}
+                  {p.data.event && <span class="event">{p.data.event}</span>}
                 </div>
                 <div class="body">
                   <p>{p.data.summary}</p>
@@ -179,6 +179,8 @@ const filters = [
   .proj h3 { font-stretch: 80%; font-weight: 750; font-size: 32px; line-height: 1; margin: 0; text-transform: uppercase; }
   a.proj:hover h3 { color: var(--cobalt); }
   .proj p { margin: 0; font-size: 15px; line-height: 1.45; }
+  .proj .lead { margin: 0; background: var(--code-bg); padding: clamp(18px, 3vw, 32px); font-size: clamp(20px, 2.3vw, 28px); font-stretch: 88%; font-weight: 500; line-height: 1.22; text-wrap: pretty; }
+  a.proj:hover .lead { color: var(--cobalt); }
 
   .filters { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 18px; }
   .filters button { font: 13px var(--sans); color: var(--dim); background: none; border: 0; padding: 0; cursor: pointer; }
@@ -193,6 +195,7 @@ const filters = [
   .entry h3 { margin: 0; font-size: 18px; font-weight: 650; line-height: 1.2; flex-basis: 100%; }
   .entry .type { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
   .entry .award { font-size: 10.5px; padding: 3px 6px 2px; }
+  .entry .event { flex-basis: 100%; font-size: 13px; color: var(--dim); }
   .entry .body { grid-column: 5 / span 6; display: grid; gap: 6px; min-width: 0; }
   .entry .body p { margin: 0; font-size: 15px; line-height: 1.45; max-width: 62ch; }
   .entry .learned { color: var(--dim); }

@@ -24,6 +24,7 @@ const d = project.data;
 
   <div class="meta g num">
     <div><span class="label">Year</span><span>{d.date.getUTCFullYear()}</span>{d.award && <span class="award">{d.award}</span>}</div>
+    {d.event && <div><span class="label">Event</span><span>{d.event}</span></div>}
     {d.role && <div><span class="label">Role</span><span>{d.role}</span></div>}
     {d.stack.length > 0 && <div><span class="label">Stack</span><span>{d.stack.join(', ')}</span></div>}
     {Object.keys(d.links).length > 0 && (

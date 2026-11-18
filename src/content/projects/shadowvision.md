@@ -4,7 +4,8 @@ date: 2026-05-15
 type: hackathon
 featured: true
 award: 2nd place, Kova Labs challenge
-summary: Gives a drone its heading from infrared shadows and the sun's position. No GPS, no magnetometer and no radio emissions, so there is nothing to jam. Built in under 48 hours at the Junction x Aalto Defence Hackathon.
+summary: "Gives a drone its heading from infrared shadows and the position of the sun. No GPS, no magnetometer, no radio emissions, so there is nothing to jam."
+event: Junction x Aalto Defence Hackathon
 learned: Talk to the engineers before choosing a problem. Magnetometer drift was their real pain point, and it came up in conversation, not in the brief.
 team: 3 people
 stack: [Python, OpenCV, ROS 2, PX4, Jetson Orin Nano, RealSense]

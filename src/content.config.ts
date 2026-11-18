@@ -13,6 +13,7 @@ const projects = defineCollection({
       learned: z.string().optional(),
       featured: z.boolean().default(false),
       award: z.string().optional(),
+      event: z.string().optional(),
       role: z.string().optional(),
       team: z.string().optional(),
       outcome: z.string().optional(),

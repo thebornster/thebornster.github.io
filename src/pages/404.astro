@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Not found">
+  <h1 class="display title">Not <span class="c">found</span></h1>
+  <p class="msg">This page doesn't exist. <a class="more" href="/">Back to all work</a></p>
+</Base>
+
+<style>
+  .title { font-size: clamp(60px, 12.5vw, 156px); margin: 40px 0 20px; }
+  .msg { border-top: 2px solid var(--ink); padding-top: 12px; font-size: 19px; margin: 0; }
+</style>
