@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { formatDate, readingTime } from '../../site';
+
+const posts = (await getCollection('posts', (p) => !p.data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Base title="Writing" section="writing">
+  <h1 class="display title">Writing</h1>
+  <div class="section-head g"><h2>All posts</h2><span class="aside num">{posts.length}</span></div>
+  <div class="list">
+    {posts.map((post) => (
+      <a class="g" href={`/writing/${post.id}/`}>
+        <span class="d num">{formatDate(post.data.date)}</span>
+        <span class="t">
+          {post.data.title}
+          <span class="desc">{post.data.description}</span>
+        </span>
+        <span class="r num">{readingTime(post.body)} min</span>
+      </a>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .title { font-size: clamp(56px, 11vw, 136px); margin: 40px 0 28px; }
+  .list a { padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
+  .list a:hover .t { color: var(--cobalt); }
+  .d { grid-column: span 2; font-size: 13px; color: var(--dim); }
+  .t { grid-column: 3 / span 7; font-size: 19px; font-weight: 500; display: grid; gap: 4px; }
+  .desc { font-size: 15px; font-weight: 400; color: var(--dim); }
+  .r { grid-column: 10 / span 3; text-align: right; font-size: 13px; color: var(--dim); }
+  @media (max-width: 780px) {
+    .d, .t { grid-column: 1 / -1; }
+    .r { display: none; }
+  }
+</style>

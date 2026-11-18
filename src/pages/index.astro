@@ -1,0 +1,220 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { site, formatDate, readingTime } from '../site';
+
+const projects = (await getCollection('projects')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const featured = projects.filter((p) => p.data.featured);
+const log = projects.filter((p) => !p.data.featured);
+const posts = (await getCollection('posts', (p) => !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const hasPage = (p: (typeof projects)[number]) => Boolean(p.body?.trim());
+const years = [...new Set(log.map((p) => p.data.date.getUTCFullYear()))];
+const wins = projects.filter((p) => p.data.award).length;
+const firstYear = Math.min(...projects.map((p) => p.data.date.getUTCFullYear()), new Date().getFullYear());
+const yy = (y: number) => String(y).slice(2);
+const typeLabel = { software: 'Software', hardware: 'Hardware', hackathon: 'Hackathon' };
+const filters = [
+  { key: 'all', label: 'All', count: log.length },
+  ...(['software', 'hardware', 'hackathon'] as const).map((t) => ({
+    key: t,
+    label: t === 'hackathon' ? 'Hackathons' : typeLabel[t],
+    count: log.filter((p) => p.data.type === t).length,
+  })),
+];
+---
+
+<Base section="work">
+  <h1 class="display hero">
+    Selected<br />work <span class="c num">&rsquo;{yy(firstYear)}&ndash;{yy(new Date().getFullYear())}</span>
+  </h1>
+
+  <div class="intro g">
+    <p>{site.pitch}</p>
+    <dl class="facts num">
+      <dt>Featured</dt><dd>{featured.length} projects</dd>
+      <dt>Project log</dt><dd>{log.length} more</dd>
+      {wins > 0 && <><dt>Hackathon awards</dt><dd>{wins}</dd></>}
+      {site.email && <><dt>Contact</dt><dd>{site.email}</dd></>}
+    </dl>
+  </div>
+
+  {featured.length > 0 && (
+    <section>
+      <div class="section-head g"><h2>Featured</h2></div>
+      {featured.map((p) => {
+        const Tag = hasPage(p) ? 'a' : 'article';
+        return (
+          <Tag class="proj g" href={hasPage(p) ? `/projects/${p.id}/` : undefined}>
+            <div class="yr num">{p.data.date.getUTCFullYear()}</div>
+            <div class="shot">
+              {p.data.image
+                ? <Image src={p.data.image} alt={p.data.imageAlt ?? ''} widths={[640, 960, 1400]} sizes="(max-width: 780px) 100vw, 60vw" />
+                : <div class="placeholder">Add a screenshot</div>}
+            </div>
+            <div class="info">
+              <h3>{p.data.title}</h3>
+              {p.data.award && <span class="award">{p.data.award}</span>}
+              <p>{p.data.summary}</p>
+              <dl class="facts">
+                {p.data.role && <><dt>Role</dt><dd>{p.data.role}</dd></>}
+                {p.data.stack.length > 0 && <><dt>Stack</dt><dd>{p.data.stack.join(', ')}</dd></>}
+                {p.data.team && <><dt>Team</dt><dd>{p.data.team}</dd></>}
+                {p.data.outcome && <><dt>Outcome</dt><dd>{p.data.outcome}</dd></>}
+              </dl>
+              {hasPage(p) && <span class="more">Read case study</span>}
+            </div>
+          </Tag>
+        );
+      })}
+    </section>
+  )}
+
+  {log.length > 0 && (
+    <section id="log">
+      <div class="section-head g">
+        <h2>Project log</h2>
+        <div class="filters aside" role="group" aria-label="Filter projects">
+          {filters.filter((f) => f.key === 'all' || f.count > 0).map((f) => (
+            <button type="button" data-filter={f.key} aria-pressed={f.key === 'all' ? 'true' : 'false'}>
+              {f.label} <span class="num">{f.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <p class="log-note">Everything else I've built, including small experiments.</p>
+
+      <div class="log">
+        {years.map((year) => (
+          <>
+            <div class="yr-row" data-year={year}><span class="display num">{year}</span></div>
+            {log.filter((p) => p.data.date.getUTCFullYear() === year).map((p) => (
+              <article class="entry g" data-type={p.data.type} data-year={year}>
+                <span class="when num">{formatDate(p.data.date, { month: 'short' })}</span>
+                <div class="what">
+                  <h3>{p.data.title}</h3>
+                  <span class="type">{typeLabel[p.data.type]}</span>
+                  {p.data.award && <span class="award">{p.data.award}</span>}
+                </div>
+                <div class="body">
+                  <p>{p.data.summary}</p>
+                  {p.data.learned && <p class="learned"><span>Learned</span>{p.data.learned}</p>}
+                  {p.data.image && (
+                    <div class="pic" id={`pic-${p.id}`} hidden>
+                      <Image src={p.data.image} alt={p.data.imageAlt ?? ''} width={960} />
+                    </div>
+                  )}
+                </div>
+                <div class="links">
+                  {Object.entries(p.data.links).map(([label, href]) => <a href={href}>{label}</a>)}
+                  {hasPage(p) && <a href={`/projects/${p.id}/`}>Write-up</a>}
+                  {p.data.image && (
+                    <button type="button" class="link-btn" aria-expanded="false" aria-controls={`pic-${p.id}`}>Screenshot</button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {posts.length > 0 && (
+    <section>
+      <div class="section-head g"><h2>Writing</h2><a class="aside" href="/writing/">All posts</a></div>
+      <div class="posts">
+        {posts.map((post) => (
+          <a class="g" href={`/writing/${post.id}/`}>
+            <span class="d num">{formatDate(post.data.date)}</span>
+            <span class="t">{post.data.title}</span>
+            <span class="r num">{readingTime(post.body)} min</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>
+
+<script>
+  const entries = document.querySelectorAll<HTMLElement>('.entry');
+  const years = document.querySelectorAll<HTMLElement>('.yr-row');
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      entries.forEach((e) => (e.hidden = f !== 'all' && e.dataset.type !== f));
+      years.forEach((y) => {
+        y.hidden = !document.querySelector(`.entry[data-year="${y.dataset.year}"]:not([hidden])`);
+      });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.entry .link-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const pic = document.getElementById(btn.getAttribute('aria-controls')!)!;
+      pic.hidden = !pic.hidden;
+      btn.setAttribute('aria-expanded', String(!pic.hidden));
+    });
+  });
+</script>
+
+<style>
+  .hero { font-size: clamp(60px, 12.5vw, 156px); margin: 40px 0 14px; }
+
+  .intro { border-top: 2px solid var(--ink); padding-top: 12px; margin-bottom: 64px; row-gap: 16px; }
+  .intro p { grid-column: 1 / span 5; margin: 0; font-size: 19px; line-height: 1.35; }
+  .intro dl { grid-column: 8 / span 5; }
+
+  .proj { padding: 18px 0 48px; border-top: 1px solid var(--line); row-gap: 16px; text-decoration: none; color: inherit; }
+  .section-head + .proj { border-top: 0; }
+  .proj .yr { grid-column: span 1; font-size: 13px; color: var(--dim); }
+  .proj .shot { grid-column: 2 / span 7; }
+  .proj .info { grid-column: 9 / span 4; display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .proj h3 { font-stretch: 80%; font-weight: 750; font-size: 32px; line-height: 1; margin: 0; text-transform: uppercase; }
+  a.proj:hover h3 { color: var(--cobalt); }
+  .proj p { margin: 0; font-size: 15px; line-height: 1.45; }
+
+  .filters { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 18px; }
+  .filters button { font: 13px var(--sans); color: var(--dim); background: none; border: 0; padding: 0; cursor: pointer; }
+  .filters button[aria-pressed='true'] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--cobalt); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .log-note { margin: 0 0 8px; font-size: 14px; color: var(--dim); }
+  .log { margin-bottom: 64px; }
+  .yr-row { padding: 28px 0 6px; border-bottom: 1px solid var(--ink); }
+  .yr-row .display { font-size: 34px; font-weight: 750; font-stretch: 75%; line-height: 1; }
+  .entry { padding: 14px 0 16px; border-bottom: 1px solid var(--line); row-gap: 8px; align-items: baseline; }
+  .entry .when { grid-column: span 1; font-size: 13px; color: var(--dim); }
+  .entry .what { grid-column: 2 / span 3; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+  .entry h3 { margin: 0; font-size: 18px; font-weight: 650; line-height: 1.2; flex-basis: 100%; }
+  .entry .type { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
+  .entry .award { font-size: 10.5px; padding: 3px 6px 2px; }
+  .entry .body { grid-column: 5 / span 6; display: grid; gap: 6px; min-width: 0; }
+  .entry .body p { margin: 0; font-size: 15px; line-height: 1.45; max-width: 62ch; }
+  .entry .learned { color: var(--dim); }
+  .entry .learned span { display: inline-block; margin-right: 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--cobalt); }
+  .entry .pic { margin-top: 6px; max-width: 480px; }
+  .entry .links { grid-column: 11 / span 2; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 14px; font-size: 13px; }
+  .link-btn { font: 13px var(--sans); background: none; border: 0; padding: 0; cursor: pointer; }
+  .link-btn[aria-expanded='true'] { color: var(--cobalt); }
+  .entry[hidden], .yr-row[hidden], .pic[hidden] { display: none; }
+
+  .posts a { padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
+  .posts a:hover .t { color: var(--cobalt); }
+  .posts .d { grid-column: span 2; font-size: 13px; color: var(--dim); }
+  .posts .t { grid-column: 3 / span 7; font-size: 18px; font-weight: 500; }
+  .posts .r { grid-column: 10 / span 3; text-align: right; font-size: 13px; color: var(--dim); }
+
+  @media (max-width: 780px) {
+    .intro p, .intro dl { grid-column: 1 / -1; }
+    .proj .yr, .proj .shot, .proj .info { grid-column: 1 / -1; }
+    .filters { justify-content: flex-start; }
+    .entry .when, .entry .what, .entry .body, .entry .links { grid-column: 1 / -1; justify-content: flex-start; }
+    .posts .d, .posts .t { grid-column: 1 / -1; }
+    .posts .r { display: none; }
+  }
+</style>
