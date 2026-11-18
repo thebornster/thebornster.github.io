@@ -2,7 +2,6 @@
 title: IR Explosion Map
 date: 2025-06-18
 type: software
-featured: false
 summary: A live map of explosion events in Iran built from citizen reports on Telegram. A GPT pipeline clusters, translates and geolocates the reports, and an interactive map shows the results.
 stack: [Python, OpenAI API, Airtable, Leaflet, Vercel, GitHub Actions]
 links:

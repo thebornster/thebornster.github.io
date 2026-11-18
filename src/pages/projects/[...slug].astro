@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import { formatDate } from '../../site';
 
 export async function getStaticPaths() {
   const withPages = (await getCollection('projects'))
@@ -16,54 +17,65 @@ export async function getStaticPaths() {
 const { project, next } = Astro.props;
 const { Content } = await render(project);
 const d = project.data;
+const typeLabel = { software: 'Software', hardware: 'Hardware', hackathon: 'Hackathon' };
 ---
 
 <Base title={d.title} description={d.summary} section="work">
-  <a class="back" href="/">&larr; All work</a>
-  <h1 class="display title">{d.title}</h1>
+  <a class="back" href="/">&larr; All projects</a>
 
-  <div class="meta g num">
-    <div><span class="label">Year</span><span>{d.date.getUTCFullYear()}</span>{d.award && <span class="award">{d.award}</span>}</div>
-    {d.event && <div><span class="label">Event</span><span>{d.event}</span></div>}
-    {d.role && <div><span class="label">Role</span><span>{d.role}</span></div>}
-    {d.stack.length > 0 && <div><span class="label">Stack</span><span>{d.stack.join(', ')}</span></div>}
-    {Object.keys(d.links).length > 0 && (
-      <div><span class="label">Links</span><span class="links">{Object.entries(d.links).map(([label, href]) => <a href={href}>{label}</a>)}</span></div>
-    )}
+  <div class="head g">
+    <div class="side num">
+      <span>{formatDate(d.date)}</span>
+      <span>{typeLabel[d.type]}</span>
+    </div>
+    <div class="titles">
+      <h1>{d.title}</h1>
+      {d.award && <span class="award">{d.award}</span>}
+    </div>
+    <p class="dek">{d.summary}</p>
   </div>
 
-  {d.image && <Image class="hero-img" src={d.image} alt={d.imageAlt ?? ''} widths={[960, 1400, 2000]} sizes="100vw" />}
-
   <div class="g">
-    <aside class="side num">
+    <aside class="side facts-side">
+      {d.event && <><span class="label">Event</span><span>{d.event}</span></>}
+      {d.role && <><span class="label">Role</span><span>{d.role}</span></>}
       {d.team && <><span class="label">Team</span><span>{d.team}</span></>}
-      {d.outcome && <><span class="label">Outcome</span><span>{d.outcome}</span></>}
+      {d.stack.length > 0 && <><span class="label">Stack</span><span>{d.stack.join(', ')}</span></>}
+      {Object.keys(d.links).length > 0 && (
+        <><span class="label">Links</span><span class="links">{Object.entries(d.links).map(([label, href]) => <a href={href}>{label}</a>)}</span></>
+      )}
     </aside>
-    <div class="prose"><Content /></div>
+    <article class="prose">
+      {d.image && <Image src={d.image} alt={d.imageAlt ?? ''} widths={[720, 1080, 1440]} sizes="(max-width: 780px) 100vw, 60vw" />}
+      <Content />
+      {d.learned && <p class="learned"><span class="label">Learned</span>{d.learned}</p>}
+    </article>
   </div>
 
   {next && next.id !== project.id && (
     <a class="next g" href={`/projects/${next.id}/`}>
       <span class="label">Next project</span>
-      <span class="display">{next.data.title} &rarr;</span>
+      <span class="t">{next.data.title} &rarr;</span>
     </a>
   )}
 </Base>
 
 <style>
-  .title { font-size: clamp(56px, 11vw, 136px); margin: 28px 0 18px; }
-  .meta { border-top: 2px solid var(--ink); padding-top: 12px; margin-bottom: 28px; row-gap: 18px; }
-  .meta > div { grid-column: span 3; display: grid; gap: 4px; font-size: 14px; align-content: start; }
-  .meta .award { margin-top: 2px; }
-  .links { display: flex; flex-wrap: wrap; gap: 4px 14px; }
-  .hero-img { width: 100%; margin-bottom: 48px; }
-  .side .label:not(:first-child) { margin-top: 12px; }
+  .head { border-top: 2px solid var(--ink); padding-top: 12px; margin: 32px 0 40px; row-gap: 18px; }
+  .head .side { padding-top: 6px; }
+  .titles { grid-column: 4 / span 9; display: grid; gap: 12px; }
+  h1 { font-stretch: 78%; font-weight: 750; font-size: clamp(38px, 5.6vw, 68px); line-height: .95; margin: 0; text-wrap: balance; }
+  .dek { grid-column: 4 / span 7; font-size: 20px; line-height: 1.4; margin: 0; color: var(--dim); }
+  .facts-side { color: var(--ink); gap: 3px; }
+  .facts-side .label:not(:first-child) { margin-top: 12px; }
+  .links { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .learned { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 4px; }
+  .learned .label { color: var(--cobalt); }
   .next { margin-top: 64px; border-top: 2px solid var(--ink); padding-top: 12px; text-decoration: none; align-items: baseline; row-gap: 8px; }
   .next .label { grid-column: span 3; }
-  .next .display { grid-column: 4 / span 9; font-size: clamp(36px, 6vw, 72px); }
-  .next:hover .display { color: var(--cobalt); }
+  .next .t { grid-column: 4 / span 9; font-stretch: 78%; font-weight: 750; font-size: clamp(26px, 3.4vw, 40px); line-height: 1; }
+  .next:hover .t { color: var(--cobalt); }
   @media (max-width: 780px) {
-    .meta > div { grid-column: span 6; }
-    .next .label, .next .display { grid-column: 1 / -1; }
+    .titles, .dek, .next .label, .next .t { grid-column: 1 / -1; }
   }
 </style>

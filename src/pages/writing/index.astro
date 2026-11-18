@@ -9,7 +9,7 @@ const posts = (await getCollection('posts', (p) => !p.data.draft)).sort(
 ---
 
 <Base title="Writing" section="writing">
-  <h1 class="display title">Writing</h1>
+  <h1 class="title">Writing</h1>
   <div class="section-head g"><h2>All posts</h2><span class="aside num">{posts.length}</span></div>
   <div class="list">
     {posts.map((post) => (
@@ -26,7 +26,7 @@ const posts = (await getCollection('posts', (p) => !p.data.draft)).sort(
 </Base>
 
 <style>
-  .title { font-size: clamp(56px, 11vw, 136px); margin: 40px 0 28px; }
+  .title { font-stretch: 78%; font-weight: 750; font-size: clamp(38px, 5.6vw, 68px); line-height: .95; margin: 40px 0 28px; }
   .list a { padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
   .list a:hover .t { color: var(--cobalt); }
   .d { grid-column: span 2; font-size: 13px; color: var(--dim); }

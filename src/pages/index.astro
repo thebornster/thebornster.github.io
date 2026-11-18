@@ -5,136 +5,86 @@ import Base from '../layouts/Base.astro';
 import { site, formatDate, readingTime } from '../site';
 
 const projects = (await getCollection('projects')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const featured = projects.filter((p) => p.data.featured);
-const log = projects.filter((p) => !p.data.featured);
 const posts = (await getCollection('posts', (p) => !p.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 
 const hasPage = (p: (typeof projects)[number]) => Boolean(p.body?.trim());
-const years = [...new Set(log.map((p) => p.data.date.getUTCFullYear()))];
-const wins = projects.filter((p) => p.data.award).length;
-const firstYear = Math.min(...projects.map((p) => p.data.date.getUTCFullYear()), new Date().getFullYear());
-const yy = (y: number) => String(y).slice(2);
+const years = [...new Set(projects.map((p) => p.data.date.getUTCFullYear()))];
+const awards = projects.filter((p) => p.data.award).length;
 const typeLabel = { software: 'Software', hardware: 'Hardware', hackathon: 'Hackathon' };
 const filters = [
-  { key: 'all', label: 'All', count: log.length },
+  { key: 'all', label: 'All', count: projects.length },
   ...(['software', 'hardware', 'hackathon'] as const).map((t) => ({
     key: t,
     label: t === 'hackathon' ? 'Hackathons' : typeLabel[t],
-    count: log.filter((p) => p.data.type === t).length,
+    count: projects.filter((p) => p.data.type === t).length,
   })),
 ];
 ---
 
 <Base section="work">
-  <h1 class="display hero">
-    Selected<br />work <span class="c num">&rsquo;{yy(firstYear)}&ndash;{yy(new Date().getFullYear())}</span>
-  </h1>
+  <section class="intro">
+    <h1>{site.pitch}</h1>
+    <p class="num">{projects.length} projects{awards > 0 && `, ${awards} hackathon awards`}{site.email && <>. Reach me at {site.email}</>}</p>
+  </section>
 
-  <div class="intro g">
-    <p>{site.pitch}</p>
-    <dl class="facts num">
-      <dt>Featured</dt><dd>{featured.length} projects</dd>
-      <dt>Project log</dt><dd>{log.length} more</dd>
-      {wins > 0 && <><dt>Hackathon awards</dt><dd>{wins}</dd></>}
-      {site.email && <><dt>Contact</dt><dd>{site.email}</dd></>}
-    </dl>
-  </div>
-
-  {featured.length > 0 && (
-    <section>
-      <div class="section-head g"><h2>Featured</h2></div>
-      {featured.map((p) => {
-        const Tag = hasPage(p) ? 'a' : 'article';
-        return (
-          <Tag class="proj g" href={hasPage(p) ? `/projects/${p.id}/` : undefined}>
-            <div class="yr num">{p.data.date.getUTCFullYear()}</div>
-            {p.data.image
-              ? <div class="shot"><Image src={p.data.image} alt={p.data.imageAlt ?? ''} widths={[640, 960, 1400]} sizes="(max-width: 780px) 100vw, 60vw" /></div>
-              : <p class="shot lead">{p.data.summary}</p>}
-            <div class="info">
-              <h3>{p.data.title}</h3>
-              {p.data.award && <span class="award">{p.data.award}</span>}
-              {p.data.image && <p>{p.data.summary}</p>}
-              <dl class="facts">
-                {p.data.event && <><dt>Event</dt><dd>{p.data.event}</dd></>}
-                {p.data.role && <><dt>Role</dt><dd>{p.data.role}</dd></>}
-                {p.data.stack.length > 0 && <><dt>Stack</dt><dd>{p.data.stack.join(', ')}</dd></>}
-                {p.data.team && <><dt>Team</dt><dd>{p.data.team}</dd></>}
-                {p.data.outcome && <><dt>Outcome</dt><dd>{p.data.outcome}</dd></>}
-              </dl>
-              {hasPage(p) && <span class="more">Read case study</span>}
-            </div>
-          </Tag>
-        );
-      })}
-    </section>
-  )}
-
-  {log.length > 0 && (
-    <section id="log">
-      <div class="section-head g">
-        <h2>Project log</h2>
-        <div class="filters aside" role="group" aria-label="Filter projects">
-          {filters.filter((f) => f.key === 'all' || f.count > 0).map((f) => (
-            <button type="button" data-filter={f.key} aria-pressed={f.key === 'all' ? 'true' : 'false'}>
-              {f.label} <span class="num">{f.count}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <p class="log-note">Everything else I've built, including small experiments.</p>
-
-      <div class="log">
-        {years.map((year) => (
-          <>
-            <div class="yr-row" data-year={year}><span class="display num">{year}</span></div>
-            {log.filter((p) => p.data.date.getUTCFullYear() === year).map((p) => (
-              <article class="entry g" data-type={p.data.type} data-year={year}>
-                <span class="when num">{formatDate(p.data.date, { month: 'short' })}</span>
-                <div class="what">
-                  <h3>{p.data.title}</h3>
-                  <span class="type">{typeLabel[p.data.type]}</span>
-                  {p.data.award && <span class="award">{p.data.award}</span>}
-                  {p.data.event && <span class="event">{p.data.event}</span>}
-                </div>
-                <div class="body">
-                  <p>{p.data.summary}</p>
-                  {p.data.learned && <p class="learned"><span>Learned</span>{p.data.learned}</p>}
-                  {p.data.image && (
-                    <div class="pic" id={`pic-${p.id}`} hidden>
-                      <Image src={p.data.image} alt={p.data.imageAlt ?? ''} width={960} />
-                    </div>
-                  )}
-                </div>
-                <div class="links">
-                  {Object.entries(p.data.links).map(([label, href]) => <a href={href}>{label}</a>)}
-                  {hasPage(p) && <a href={`/projects/${p.id}/`}>Write-up</a>}
-                  {p.data.image && (
-                    <button type="button" class="link-btn" aria-expanded="false" aria-controls={`pic-${p.id}`}>Screenshot</button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </>
+  <section id="projects">
+    <div class="section-head g">
+      <h2>Projects</h2>
+      <div class="filters aside" role="group" aria-label="Filter projects">
+        {filters.filter((f) => f.key === 'all' || f.count > 0).map((f) => (
+          <button type="button" data-filter={f.key} aria-pressed={f.key === 'all' ? 'true' : 'false'}>
+            {f.label} <span class="num">{f.count}</span>
+          </button>
         ))}
       </div>
-    </section>
-  )}
+    </div>
+
+    {years.map((year) => (
+      <>
+        <div class="yr-row" data-year={year}><span class="num">{year}</span></div>
+        {projects.filter((p) => p.data.date.getUTCFullYear() === year).map((p) => (
+          <article class="entry g" data-type={p.data.type} data-year={year}>
+            <span class="when num">{formatDate(p.data.date, { month: 'short' })}</span>
+            <div class="what">
+              <h3>{hasPage(p) ? <a href={`/projects/${p.id}/`}>{p.data.title}</a> : p.data.title}</h3>
+              <span class="type">{typeLabel[p.data.type]}</span>
+              {p.data.award && <span class="award">{p.data.award}</span>}
+            </div>
+            <div class="body">
+              <p>{p.data.summary}</p>
+              {p.data.event && <p class="meta">{p.data.event}</p>}
+              {p.data.learned && <p class="learned"><span>Learned</span>{p.data.learned}</p>}
+              {p.data.image && (
+                <div class="pic" id={`pic-${p.id}`} hidden>
+                  <Image src={p.data.image} alt={p.data.imageAlt ?? ''} width={960} />
+                </div>
+              )}
+            </div>
+            <div class="links">
+              {hasPage(p) && <a href={`/projects/${p.id}/`}>Write-up</a>}
+              {Object.entries(p.data.links).map(([label, href]) => <a href={href}>{label}</a>)}
+              {p.data.image && (
+                <button type="button" class="link-btn" aria-expanded="false" aria-controls={`pic-${p.id}`}>Screenshot</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </>
+    ))}
+  </section>
 
   {posts.length > 0 && (
-    <section>
+    <section class="writing">
       <div class="section-head g"><h2>Writing</h2><a class="aside" href="/writing/">All posts</a></div>
-      <div class="posts">
-        {posts.map((post) => (
-          <a class="g" href={`/writing/${post.id}/`}>
-            <span class="d num">{formatDate(post.data.date)}</span>
-            <span class="t">{post.data.title}</span>
-            <span class="r num">{readingTime(post.body)} min</span>
-          </a>
-        ))}
-      </div>
+      {posts.map((post) => (
+        <a class="post g" href={`/writing/${post.id}/`}>
+          <span class="when num">{formatDate(post.data.date)}</span>
+          <span class="t">{post.data.title}</span>
+          <span class="r num">{readingTime(post.body)} min</span>
+        </a>
+      ))}
     </section>
   )}
 </Base>
@@ -165,39 +115,26 @@ const filters = [
 </script>
 
 <style>
-  .hero { font-size: clamp(60px, 12.5vw, 156px); margin: 40px 0 14px; }
-
-  .intro { border-top: 2px solid var(--ink); padding-top: 12px; margin-bottom: 64px; row-gap: 16px; }
-  .intro p { grid-column: 1 / span 5; margin: 0; font-size: 19px; line-height: 1.35; }
-  .intro dl { grid-column: 8 / span 5; }
-
-  .proj { padding: 18px 0 48px; border-top: 1px solid var(--line); row-gap: 16px; text-decoration: none; color: inherit; }
-  .section-head + .proj { border-top: 0; }
-  .proj .yr { grid-column: span 1; font-size: 13px; color: var(--dim); }
-  .proj .shot { grid-column: 2 / span 7; }
-  .proj .info { grid-column: 9 / span 4; display: grid; gap: 12px; align-content: start; min-width: 0; }
-  .proj h3 { font-stretch: 80%; font-weight: 750; font-size: 32px; line-height: 1; margin: 0; text-transform: uppercase; }
-  a.proj:hover h3 { color: var(--cobalt); }
-  .proj p { margin: 0; font-size: 15px; line-height: 1.45; }
-  .proj .lead { margin: 0; background: var(--code-bg); padding: clamp(18px, 3vw, 32px); font-size: clamp(20px, 2.3vw, 28px); font-stretch: 88%; font-weight: 500; line-height: 1.22; text-wrap: pretty; }
-  a.proj:hover .lead { color: var(--cobalt); }
+  .intro { padding: 56px 0 64px; display: grid; gap: 14px; }
+  .intro h1 { margin: 0; max-width: 24ch; font-size: clamp(30px, 4.4vw, 52px); font-stretch: 82%; font-weight: 650; line-height: 1.05; text-wrap: balance; }
+  .intro p { margin: 0; font-size: 14px; color: var(--dim); }
 
   .filters { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 18px; }
   .filters button { font: 13px var(--sans); color: var(--dim); background: none; border: 0; padding: 0; cursor: pointer; }
   .filters button[aria-pressed='true'] { color: var(--ink); text-decoration: underline; text-decoration-color: var(--cobalt); text-decoration-thickness: 2px; text-underline-offset: 4px; }
-  .log-note { margin: 0 0 8px; font-size: 14px; color: var(--dim); }
-  .log { margin-bottom: 64px; }
-  .yr-row { padding: 28px 0 6px; border-bottom: 1px solid var(--ink); }
-  .yr-row .display { font-size: 34px; font-weight: 750; font-stretch: 75%; line-height: 1; }
-  .entry { padding: 14px 0 16px; border-bottom: 1px solid var(--line); row-gap: 8px; align-items: baseline; }
+
+  .yr-row { padding: 28px 0 6px; border-bottom: 1px solid var(--ink); font-size: 13px; font-weight: 600; letter-spacing: .06em; }
+  .entry { padding: 16px 0 18px; border-bottom: 1px solid var(--line); row-gap: 8px; align-items: baseline; }
   .entry .when { grid-column: span 1; font-size: 13px; color: var(--dim); }
-  .entry .what { grid-column: 2 / span 3; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
-  .entry h3 { margin: 0; font-size: 18px; font-weight: 650; line-height: 1.2; flex-basis: 100%; }
+  .entry .what { grid-column: 2 / span 3; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; min-width: 0; }
+  .entry h3 { margin: 0; font-size: 19px; font-weight: 650; line-height: 1.2; flex-basis: 100%; }
+  .entry h3 a { text-decoration: none; }
+  .entry h3 a:hover { color: var(--cobalt); }
   .entry .type { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
   .entry .award { font-size: 10.5px; padding: 3px 6px 2px; }
-  .entry .event { flex-basis: 100%; font-size: 13px; color: var(--dim); }
   .entry .body { grid-column: 5 / span 6; display: grid; gap: 6px; min-width: 0; }
   .entry .body p { margin: 0; font-size: 15px; line-height: 1.45; max-width: 62ch; }
+  .entry .meta { font-size: 13px !important; color: var(--dim); }
   .entry .learned { color: var(--dim); }
   .entry .learned span { display: inline-block; margin-right: 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--cobalt); }
   .entry .pic { margin-top: 6px; max-width: 480px; }
@@ -206,18 +143,18 @@ const filters = [
   .link-btn[aria-expanded='true'] { color: var(--cobalt); }
   .entry[hidden], .yr-row[hidden], .pic[hidden] { display: none; }
 
-  .posts a { padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
-  .posts a:hover .t { color: var(--cobalt); }
-  .posts .d { grid-column: span 2; font-size: 13px; color: var(--dim); }
-  .posts .t { grid-column: 3 / span 7; font-size: 18px; font-weight: 500; }
-  .posts .r { grid-column: 10 / span 3; text-align: right; font-size: 13px; color: var(--dim); }
+  .writing { margin-top: 64px; }
+  .post { padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; align-items: baseline; row-gap: 4px; }
+  .post:hover .t { color: var(--cobalt); }
+  .post .when { grid-column: span 2; font-size: 13px; color: var(--dim); }
+  .post .t { grid-column: 3 / span 7; font-size: 17px; font-weight: 500; }
+  .post .r { grid-column: 10 / span 3; text-align: right; font-size: 13px; color: var(--dim); }
 
   @media (max-width: 780px) {
-    .intro p, .intro dl { grid-column: 1 / -1; }
-    .proj .yr, .proj .shot, .proj .info { grid-column: 1 / -1; }
+    .intro { padding: 32px 0 44px; }
     .filters { justify-content: flex-start; }
     .entry .when, .entry .what, .entry .body, .entry .links { grid-column: 1 / -1; justify-content: flex-start; }
-    .posts .d, .posts .t { grid-column: 1 / -1; }
-    .posts .r { display: none; }
+    .post .when, .post .t { grid-column: 1 / -1; }
+    .post .r { display: none; }
   }
 </style>

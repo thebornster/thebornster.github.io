@@ -11,7 +11,6 @@ const projects = defineCollection({
       type: z.enum(['software', 'hardware', 'hackathon']),
       summary: z.string(),
       learned: z.string().optional(),
-      featured: z.boolean().default(false),
       award: z.string().optional(),
       event: z.string().optional(),
       role: z.string().optional(),

@@ -2,7 +2,6 @@
 title: Valmet Digital Twin
 date: 2026-11-06
 type: hackathon
-featured: false
 summary: "Turns a 3D Gaussian Splatting scan of an equipment room into a navigable digital twin with detected equipment, inspection routes and AI service diagnostics."
 event: Since AI Hackathon 2026, Valmet challenge
 team: 4 people

@@ -2,7 +2,6 @@
 title: ShadowVision
 date: 2026-05-15
 type: hackathon
-featured: true
 award: 2nd place, Kova Labs challenge
 summary: "Gives a drone its heading from infrared shadows and the position of the sun. No GPS, no magnetometer, no radio emissions, so there is nothing to jam."
 event: Junction x Aalto Defence Hackathon

@@ -2,7 +2,6 @@
 title: RealEyes
 date: 2026-05-01
 type: hackathon
-featured: true
 award: 1st place, Supercell track + Crowd Favorite
 summary: "A horror game that watches you through your webcam. NPCs read your face and hesitation in real time, and the dialogue turns on what they see."
 event: Supercell x Florent Venture Partners Agentic Frontier Hackathon

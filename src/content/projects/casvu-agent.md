@@ -2,7 +2,6 @@
 title: CASVU Agent
 date: 2026-04-18
 type: hackathon
-featured: true
 award: Winner, CasvuGen Challenge
 summary: "An autonomous marketing agent that turns one company URL into a full campaign: brand voice profile, competitor analysis, on-brand posts and an ML engagement score for each."
 event: Startup Hack by Antler and AaltoAI

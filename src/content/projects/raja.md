@@ -2,7 +2,6 @@
 title: Raja
 date: 2026-09-19
 type: software
-featured: true
 summary: "A policy gateway between an AI agent and its tools. It tracks where every piece of data came from, and stops prompt injection and unlawful cross-border transfers with the same mechanism."
 stack: [Python, MCP, Azure OpenAI, Azure Container Apps]
 links:
